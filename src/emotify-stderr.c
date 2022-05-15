@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #define lenof(array) sizeof(array)/sizeof(*array)
@@ -77,7 +76,7 @@ static void* watchdog(void*) {
 
 void libemotify_init(void) {
 	// Initialize RNG
-	srand(time(0));
+	srand(getpid());
 
 	// Get environment
 	const char* env_colors = getenv("EMOTIFY_COLORS");

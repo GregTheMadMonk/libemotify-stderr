@@ -24,10 +24,10 @@ static const char* reactions[] = {
 static void* watchdog(void*) {
 	char c[BUF_SIZE];
 	size_t len;
-	const char** react = reactions;
+	const char* react = reactions[0];
 	while ((len = read(pipe_fds[0], c, BUF_SIZE)) != 0) {
-		react = &reactions[rand() * lenof(reactions) / RAND_MAX];
-		write(stderr_old, *react, strlen(*react));
+		react = reactions[rand() * lenof(reactions) / RAND_MAX];
+		write(stderr_old, react, strlen(react));
 		write(stderr_old, c, len);
 	}
 	pthread_exit(NULL);

@@ -9,4 +9,4 @@ file(GLOB_RECURSE _SOURCES src/*.c)
 
 add_library(${CMAKE_PROJECT_NAME} SHARED ${_SOURCES})
 target_link_libraries(${CMAKE_PROJECT_NAME} pthread)
-target_link_options(${CMAKE_PROJECT_NAME} PRIVATE "-nostartfiles")
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE "-Wl,-init,libemotify_init" "-Wl,-fini,libemotify_fini")

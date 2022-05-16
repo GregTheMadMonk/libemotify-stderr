@@ -7,8 +7,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#define lenof(array) sizeof(array)/sizeof(*array)
-#define rand_range(range) rand() * range / RAND_MAX
+#define lenof(array)		( sizeof(array)/sizeof(*array) )
+#define rand_from(array)	( array[rand() * lenof(array) / RAND_MAX] )
 
 static int pipe_fds[2];// Pipe I/O file descriptors
 static int stderr_old;	// Old stderr file descriptor
@@ -56,13 +56,13 @@ static void* watchdog(void*) {
 			write(stderr_old, &line_edited, 1);
 			if (use_reacts) {
 				// Select and print a random reaction
-				react = reactions[rand_range(lenof(reactions))];
+				react = rand_from(reactions);
 				write(stderr_old, react, strlen(react));
 			}
 
 			if (use_colors) {
 				// Write a random color code
-				color = colors[rand_range(lenof(colors))];
+				color = rand_from(colors);
 				write(stderr_old, "\033[", 2);
 				write(stderr_old, color, strlen(color));
 				write(stderr_old, "m", 1);

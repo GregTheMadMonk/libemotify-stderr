@@ -7,8 +7,10 @@
 #include <string.h>
 #include <unistd.h>
 
+static unsigned int rand_seed;
+
 #define lenof(array)		( sizeof(array)/sizeof(*array) )
-#define rand_from(array)	( array[rand() * lenof(array) / RAND_MAX] )
+#define rand_from(array)	( array[rand_r(&rand_seed) * lenof(array) / RAND_MAX] )
 
 static int pipe_fds[2];// Pipe I/O file descriptors
 static int stderr_old;	// Old stderr file descriptor
@@ -75,7 +77,7 @@ static void* watchdog(void*) {
 
 void libemotify_init(void) {
 	// Initialize RNG
-	srand(getpid());
+	rand_seed = getpid();
 
 	// Get environment
 	const char* env_colors = getenv("EMOTIFY_COLORS");

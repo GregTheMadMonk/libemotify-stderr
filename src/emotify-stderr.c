@@ -77,7 +77,7 @@ void libemotify_init(void) {
 	if (env_reacts) use_reacts = strcmp(env_reacts, "0");
 
 	// Create a pipe to pass stderr through
-	pipe(pipe_fds);
+	pipe2(pipe_fds, O_CLOEXEC);
 	// Create a copy of the original stderr file descriptor
 	stderr_old = dup(STDERR_FILENO);
 	// Reassign pipe input to stderr

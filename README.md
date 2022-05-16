@@ -33,5 +33,4 @@ LD_PRELOAD=/path/to/libemotify-stderr.so command
 * `EMOJIFY_REACTS=0` will disable emojis
 
 ## Known issues
-* Sometimes the emojis will get outputed several times per line 😔
 * git uses stderr for output and doesn't like this lib 😠

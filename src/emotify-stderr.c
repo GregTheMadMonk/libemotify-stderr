@@ -12,12 +12,11 @@ static unsigned int rand_seed;
 #define lenof(array)		( sizeof(array)/sizeof(*array) )
 #define rand_from(array)	( array[rand_r(&rand_seed) * lenof(array) / RAND_MAX] )
 
-static int pipe_fds[2];// Pipe I/O file descriptors
-static int stderr_old;	// Old stderr file descriptor
+static int pipe_fds[2];		// Pipe I/O file descriptors
+static int stderr_old = -1;	// Old stderr file descriptor
 static pthread_t reader_thread; // Thread for reading the pipe
 
 static int use_reacts = 1;
-static const char line_edited = '\0';
 static const char* reactions[] = {
 	"😳 ", "😕 ", "🤔 ", "😡 ", "🤣 ", "🙃 ", "🥲 ",
 	"😋 ", "🤫 ", "🤨 ", "😐 ", "🤮 ", "🤯 ", "😵 ",
@@ -40,22 +39,12 @@ static void* watchdog(void*) {
 
 	// Read pipe input character-by-character
 	while (read(pipe_fds[0], &c, 1) != 0) {
-		if (newline && (c == line_edited)) {
-			// If '\n' is followed by line_edited, that means that another
-			// (child) process has already modified the output and no actions
-			// need to be taken
-			newline = 0;
-			continue;
-		}
-
 		// Each time a printable character is written after a newline, output a reaction
 		if (c == '\n') {
 			if (use_colors) write(stderr_old, colors_reset, strlen(colors_reset));
 			newline = 1;
 		} else if (newline && isprint(c)) {
 			newline = 0;
-			// Prevent parents from editing the line
-			write(stderr_old, &line_edited, 1);
 			if (use_reacts) {
 				// Select and print a random reaction
 				react = rand_from(reactions);
@@ -76,6 +65,8 @@ static void* watchdog(void*) {
 }
 
 void libemotify_init(void) {
+	if (!isatty(STDERR_FILENO)) return;
+
 	// Initialize RNG
 	rand_seed = getpid();
 
@@ -97,6 +88,9 @@ void libemotify_init(void) {
 }
 
 void libemotify_fini(void) {
+	// stderr_old == -1 means output spoofing wasn't initialized
+	if (stderr_old == -1) return;
+
 	// Close the fake stderr
 	close(pipe_fds[1]);
 	// Return stderr to its original state
